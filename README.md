@@ -58,15 +58,16 @@ Luajit是Lua即时编译器。
   [root@openstack-compute-node5 nginx-1.9.4]# export LUAJIT_LIB=/usr/local/lib
   [root@openstack-compute-node5 nginx-1.9.4]# export LUAJIT_INC=/usr/local/include/luajit-2.0
   [root@openstack-compute-node5 nginx-1.9.4]# ./configure --prefix=/usr/local/nginx --user=www --group=www     --with-http_ssl_module --with-http_stub_status_module --with-file-aio --with-http_dav_module --add-module=../ngx_devel_kit-0.2.19/ --add-module=../lua-nginx-module-0.9.16/ --with-pcre=/usr/local/src/pcre-8.37 
-[root@openstack-compute-node5 nginx-1.5.12]# make -j2 && make install
+    [root@openstack-compute-node5 nginx-1.5.12]# make -j2 && make install
 
-[root@openstack-compute-node5 ~]# ln -s /usr/local/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
+    [root@openstack-compute-node5 ~]# ln -s /usr/local/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
 </pre>
 如果不创建符号链接，可能出现以下异常：
 error while loading shared libraries: libluajit-5.1.so.2: cannot open shared object file: No such file or directory
 
 #####测试安装
 安装完毕后，下面可以测试安装了，修改nginx.conf 增加第一个配置。
+<pre>
         location /hello {
                 default_type 'text/plain';
                 content_by_lua 'ngx.say("hello,lua")';
@@ -74,7 +75,11 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
     
 [root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx –t
 [root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx
-然后访问http://xxx.xxx.xxx.xxx/hello，如果出现hello,lua。表示安装完成。
+</pre>
+
+然后访问http://xxx.xxx.xxx.xxx/hello，如果出现hello,lua。表示安装完成,然后就可以。
+
+注意：也可以直接部署春哥的开源项目：https://github.com/openresty
 
 ####WAF部署
 
