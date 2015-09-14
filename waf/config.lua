@@ -1,0 +1,11 @@
+Log_Dir = "/tmp"
+Rule_Dir = "/usr/local/nginx/conf/waf/rule-config"
+White_List_Ip = {"223.223.200.106","1.202.253.18"}
+Block_List_Ip = {"114.253.216.186"}
+Url_Deny = "on"
+Url_White = "on"
+User_Agent_Deny = "on"
+Cookie_Deny = "on"
+CC_Deny = "on"
+CC_Rate = "80/60"
+Attack_Log = "on"
