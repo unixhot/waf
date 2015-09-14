@@ -40,8 +40,10 @@
    [root@nginx-lua src]# useradd -s /sbin/nologin -M www
 
 解压NDK和lua-nginx-module
+<pre>
     [root@openstack-compute-node5 src]# tar zxvf v0.2.19 解压后为ngx_devel_kit-0.2.19
     [root@openstack-compute-node5 src]# tar zxvf v0.9.10解压后为lua-nginx-module-0.9.16
+</pre>
 
 安装LuaJIT
 Luajit是Lua即时编译器。
@@ -58,9 +60,9 @@ Luajit是Lua即时编译器。
   [root@openstack-compute-node5 nginx-1.9.4]# export LUAJIT_LIB=/usr/local/lib
   [root@openstack-compute-node5 nginx-1.9.4]# export LUAJIT_INC=/usr/local/include/luajit-2.0
   [root@openstack-compute-node5 nginx-1.9.4]# ./configure --prefix=/usr/local/nginx --user=www --group=www     --with-http_ssl_module --with-http_stub_status_module --with-file-aio --with-http_dav_module --add-module=../ngx_devel_kit-0.2.19/ --add-module=../lua-nginx-module-0.9.16/ --with-pcre=/usr/local/src/pcre-8.37 
-    [root@openstack-compute-node5 nginx-1.5.12]# make -j2 && make install
+  [root@openstack-compute-node5 nginx-1.5.12]# make -j2 && make install
 
-    [root@openstack-compute-node5 ~]# ln -s /usr/local/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
+  [root@openstack-compute-node5 ~]# ln -s /usr/local/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
 </pre>
 如果不创建符号链接，可能出现以下异常：
 error while loading shared libraries: libluajit-5.1.so.2: cannot open shared object file: No such file or directory
@@ -73,8 +75,8 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
                 content_by_lua 'ngx.say("hello,lua")';
         }
     
-[root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx –t
-[root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx
+[root@openstack-compute-node5 ~]# /usr/local/nginx-1.9.4/sbin/nginx –t
+[root@openstack-compute-node5 ~]# /usr/local/nginx-1.9.4/sbin/nginx
 </pre>
 
 然后访问http://xxx.xxx.xxx.xxx/hello，如果出现hello,lua。表示安装完成,然后就可以。
@@ -83,7 +85,21 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 
 ####WAF部署
 
+<pre>
+#git clone https://github.com/unixhot/waf.git
 
+修改Nginx的配置文件，加入以下配置。注意路径，同时WAF日志默认存放在/tmp/日期_waf.log
+#WAF
+    lua_shared_dict limit 50m;
+    lua_package_path "/usr/local/nginx/conf/waf/?.lua";
+    init_by_lua_file "/usr/local/nginx/conf/waf/init.lua";
+    access_by_lua_file "/usr/local/nginx/conf/waf/access.lua";
 
+[root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx –t
+[root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx
+</pre>
+
+##广告：
+51CTO在线视频：赵班长出品，绝不坑人！http://edu.51cto.com/lecturer/index/user_id-1110045.html
 
 
