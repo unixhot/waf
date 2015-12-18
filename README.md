@@ -100,7 +100,6 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 [root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx
 </pre>
 
-##广告：
-51CTO在线视频：赵班长出品，绝不坑人！http://edu.51cto.com/lecturer/index/user_id-1110045.html
+
 
 
