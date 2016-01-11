@@ -83,21 +83,55 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 
 注意：也可以直接部署春哥的开源项目：https://github.com/openresty
 
+#### OpenResty部署
+<pre>
+安装依赖包
+# yum install -y readline-devel pcre-devel openssl-devel
+# cd /usr/local/src
+下载并编译安装openresty
+# wget https://openresty.org/download/ngx_openresty-1.9.3.2.tar.gz
+# tar zxf ngx_openresty-1.9.3.2.tar.gz
+# cd ngx_openresty-1.9.3.2
+# ./configure --prefix=/usr/local/openresty-1.9.3.2 \
+--with-luajit --with-http_stub_status_module \
+--with-pcre --with-pcre-jit
+# gmake && gmake install
+# ln -s /usr/local/openresty-1.9.3.2/ /usr/local/openresty
+
+测试openresty安装
+# vim /usr/local/openresty/nginx/conf/nginx.conf
+server {
+    location /hello {
+            default_type text/html;
+            content_by_lua_block {
+                ngx.say("HelloWorld")
+            }
+        }
+}
+# /usr/local/openresty/nginx/sbin/nginx -t
+nginx: the configuration file /usr/local/openresty-1.9.3.2/nginx/conf/nginx.conf syntax is ok
+nginx: configuration file /usr/local/openresty-1.9.3.2/nginx/conf/nginx.conf test is successful
+# /usr/local/openresty/nginx/sbin/nginx
+Hello World
+# curl http://192.168.199.33/hello
+HelloWorld
+</pre>
+
 ####WAF部署
 
 <pre>
 #git clone https://github.com/unixhot/waf.git
-#cp -a ./waf/waf /usr/local/nginx/conf/
+#cp -a ./waf/waf /usr/local/openresty/nginx/conf/
 
 修改Nginx的配置文件，加入以下配置。注意路径，同时WAF日志默认存放在/tmp/日期_waf.log
 #WAF
     lua_shared_dict limit 50m;
-    lua_package_path "/usr/local/nginx/conf/waf/?.lua";
-    init_by_lua_file "/usr/local/nginx/conf/waf/init.lua";
-    access_by_lua_file "/usr/local/nginx/conf/waf/access.lua";
+    lua_package_path "/usr/local/openresty/nginx/conf/waf/?.lua";
+    init_by_lua_file "/usr/local/openresty/nginx/conf/waf/init.lua";
+    access_by_lua_file "/usr/local/openresty/nginx/conf/waf/access.lua";
 
-[root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx –t
-[root@openstack-compute-node5 ~]# /usr/local/nginx-1.5.12/sbin/nginx
+[root@openstack-compute-node5 ~]# /usr/local/openresty/nginx/sbin/nginx –t
+[root@openstack-compute-node5 ~]# /usr/local/openresty/nginx/sbin/nginx
 </pre>
 
 
