@@ -1,17 +1,18 @@
-require 'config'
+require 'init'
 
-function WAF_Main()
-	if WhiteListIp() then
-	elseif DenyBlockIp() then
-	elseif DenyUserAgent() then
-	elseif DenyCCAttack() then
-	elseif DenyCookie() then
-	elseif WhiteUrl() then
-	elseif DenyUrl() then
-	elseif DenyUrlArgs() then
-	else
-		return
-	end
+function waf_main()
+    if white_ip_check() then
+    elseif black_ip_check() then
+    elseif user_agent_attack_check() then
+    elseif cc_attack_check() then
+    elseif cookie_attack_check() then
+    elseif white_url_check() then
+    elseif url_attack_check() then
+    elseif url_args_attack_check() then
+    --elseif post_attack_check() then
+    else
+        return
+    end
 end
 
-WAF_Main()
+waf_main()
