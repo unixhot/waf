@@ -38,7 +38,7 @@ config_output_html=[[
 <title>网站防火墙</title>
 </head>
 <body>
-<h1 align="center"> 欢迎白帽子进行授权安全测试，安全漏洞请联系QQ：57459267。
+<h1 align="center"> 欢迎白帽子进行授权安全测试，安全漏洞请联系QQ：1111111。
 </body>
 </html>
 ]]
