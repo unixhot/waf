@@ -52,7 +52,7 @@ function log_record(method,url,data,ruletag)
     local LOCAL_TIME = ngx.localtime()
     local log_json_obj = {
                  client_ip = CLIENT_IP,
-                 local_time = LOACL_TIME,
+                 local_time = LOCAL_TIME,
                  server_name = SERVER_NAME,
                  user_agent = USER_AGENT,
                  attack_method = method,
