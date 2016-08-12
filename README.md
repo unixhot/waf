@@ -134,7 +134,3 @@ HelloWorld
 [root@openstack-compute-node5 ~]# /usr/local/openresty/nginx/sbin/nginx –t
 [root@openstack-compute-node5 ~]# /usr/local/openresty/nginx/sbin/nginx
 </pre>
-
-
-
-
