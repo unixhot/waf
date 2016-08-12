@@ -3,7 +3,7 @@
 --waf status
 config_waf_enable = "on"
 --log dir
-config_log_dir = "/tmp/waf_logs"
+config_log_dir = "/tmp"
 --rule setting
 config_rule_dir = "/usr/local/openresty/nginx/conf/waf/rule-config"
 --enable/disable white url
@@ -29,7 +29,7 @@ config_post_check = "on"
 --config waf output redirect/html
 config_waf_output = "html"
 --if config_waf_output ,setting url
-config_waf_redirect_url = "http://www.baidu.com"
+config_waf_redirect_url = "https://www.unixhot.com"
 config_output_html=[[
 <html>
 <head>
