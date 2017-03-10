@@ -49,7 +49,7 @@ function white_url_check()
         if URL_WHITE_RULES ~= nil then
             for _,rule in pairs(URL_WHITE_RULES) do
                 if rule ~= "" and rulematch(REQ_URI,rule,"jo") then
-                    return true 
+                    return true
                 end
             end
         end
@@ -68,9 +68,9 @@ function cc_attack_check()
         if req then
             if req > CCcount then
                 log_record('CC_Attack',ngx.var.request_uri,"-","-")
-		if config_waf_enable == "on" then
+                if config_waf_enable == "on" then
                     ngx.exit(403)
-		end
+                end
             else
                 limit:incr(CC_TOKEN,1)
             end
@@ -153,7 +153,7 @@ function user_agent_attack_check()
                 if rule ~="" and rulematch(USER_AGENT,rule,"jo") then
                     log_record('Deny_USER_AGENT',ngx.var.request_uri,"-",rule)
                     if config_waf_enable == "on" then
-		        waf_output()
+                        waf_output()
                         return true
                     end
                 end
@@ -173,4 +173,5 @@ function post_attack_check()
         return true
     end
     return false
-end 
+end
+
