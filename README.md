@@ -80,7 +80,7 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 [root@openstack-compute-node5 ~]# /usr/local/nginx-1.9.4/sbin/nginx
 </pre>
 
-然后访问http://xxx.xxx.xxx.xxx/hello，如果出现hello,lua。表示安装完成,然后就可以。
+然后访问http://xxx.xxx.xxx.xxx/hello 如果出现hello,lua。表示安装完成,然后就可以。
 
 注意：也可以直接部署春哥的开源项目：https://github.com/openresty
 
