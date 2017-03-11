@@ -8,7 +8,7 @@ function get_client_ip()
         CLIENT_IP = ngx.req.get_headers()["X_Forwarded_For"]
     end
     if CLIENT_IP == nil then
-        CLIENT_IP  = ngx.var.remote_addr 
+        CLIENT_IP  = ngx.var.remote_addr
     end
     if CLIENT_IP == nil then
         CLIENT_IP  = "unknown"
@@ -58,17 +58,17 @@ function log_record(method,url,data,ruletag)
                  attack_method = method,
                  req_url = url,
                  req_data = data,
-                 rule_tag = ruletag,  
+                 rule_tag = ruletag,
               }
     local LOG_LINE = cjson.encode(log_json_obj)
-	  local LOG_NAME = LOG_PATH..'/'..ngx.today().."_waf.log"
-	  local file = io.open(LOG_NAME,"a")
-	  if file == nil then
-	     return
-	  end
+    local LOG_NAME = LOG_PATH..'/'..ngx.today().."_waf.log"
+    local file = io.open(LOG_NAME,"a")
+    if file == nil then
+        return
+    end
     file:write(LOG_LINE.."\n")
-	  file:flush()
-	  file:close()
+    file:flush()
+    file:close()
 end
 
 --WAF return
@@ -82,3 +82,4 @@ function waf_output()
         ngx.exit(ngx.status)
     end
 end
+
