@@ -27,14 +27,14 @@
     [root@nginx-lua ~]# cd /usr/local/src
 首先，现在Nginx安装必备的Nginx和PCRE软件包。
 <pre>
-[root@nginx-lua src]# wget http://nginx.org/download/nginx-1.9.4.tar.gz
-[root@nginx-lua src]# wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.37.tar.gz
+[root@nginx-lua src]# wget 'http://nginx.org/download/nginx-1.12.1.tar.gz'
+[root@nginx-lua src]# wget https://nchc.dl.sourceforge.net/project/pcre/pcre/8.41/pcre-8.41.tar.gz
 </pre>
 其次，下载当前最新的luajit和ngx_devel_kit (NDK)，以及春哥（章）编写的lua-nginx-module
 <pre>
-  [root@nginx-lua src]# wget http://luajit.org/download/LuaJIT-2.0.4.tar.gz
-  [root@nginx-lua src]# wget https://github.com/simpl/ngx_devel_kit/archive/v0.2.19.tar.gz
-  [root@nginx-lua src]# wget https://github.com/openresty/lua-nginx-module/archive/v0.9.16.tar.gz
+  [root@nginx-lua src]# wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz
+  [root@nginx-lua src]# wget https://github.com/simpl/ngx_devel_kit/archive/v0.3.0.tar.gz
+  [root@nginx-lua src]# wget wget https://github.com/chaoslawful/lua-nginx-module/archive/v0.10.10.zip
 </pre>
 
 最后，创建Nginx运行的普通用户
@@ -42,28 +42,29 @@
 
 解压NDK和lua-nginx-module
 <pre>
-    [root@openstack-compute-node5 src]# tar zxvf v0.2.19 解压后为ngx_devel_kit-0.2.19
-    [root@openstack-compute-node5 src]# tar zxvf v0.9.10解压后为lua-nginx-module-0.9.16
+    [root@openstack-compute-node5 src]# tar zxvf v0.3.0.tar.gz 解压后为ngx_devel_kit-0.3.0
+    [root@openstack-compute-node5 src]# unzip -q v0.10.10.zip解压后为lua-nginx-module-0.10.10
 </pre>
 
 安装LuaJIT
 Luajit是Lua即时编译器。
 <pre>
-  [root@openstack-compute-node5 src]# tar zxvf LuaJIT-2.0.3.tar.gz 
-  [root@openstack-compute-node5 src]# cd LuaJIT-2.0.3
-  [root@openstack-compute-node5 LuaJIT-2.0.3]# make && make install
+[root@webs-ebt src]# tar zxvf LuaJIT-2.0.5.tar.gz 
+[root@webs-ebt src]# cd LuaJIT-2.0.5
+[root@webs-ebt LuaJIT-2.0.5]# make && make install
 </pre>
 
 安装Nginx并加载模块
 <pre>
-  [root@openstack-compute-node5 src]# tar zxvf nginx-1.9.4.tar.gz 
-  [root@openstack-compute-node5 src]# cd nginx-1.9.4
-  [root@openstack-compute-node5 nginx-1.9.4]# export LUAJIT_LIB=/usr/local/lib
-  [root@openstack-compute-node5 nginx-1.9.4]# export LUAJIT_INC=/usr/local/include/luajit-2.0
-  [root@openstack-compute-node5 nginx-1.9.4]# ./configure --prefix=/usr/local/nginx --user=www --group=www     --with-http_ssl_module --with-http_stub_status_module --with-file-aio --with-http_dav_module --add-module=../ngx_devel_kit-0.2.19/ --add-module=../lua-nginx-module-0.9.16/ --with-pcre=/usr/local/src/pcre-8.37 
-  [root@openstack-compute-node5 nginx-1.5.12]# make -j2 && make install
-
-  [root@openstack-compute-node5 ~]# ln -s /usr/local/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
+[root@webs-ebt src]# tar zxf nginx-1.12.1.tar.gz
+[root@webs-ebt src]# tar zxvf pcre-8.41.tar.gz 
+[root@webs-ebt src]# cd nginx-1.12.1
+[root@webs-ebt nginx-1.12.1]# export LUAJIT_LIB=/usr/local/lib
+[root@webs-ebt nginx-1.12.1]# export LUAJIT_INC=/usr/local/include/luajit-2.0
+[root@webs-ebt nginx-1.12.1]#./configure --user=www --group=www --prefix=/usr/local/nginx-1.12.1/ --with-pcre=/usr/local/src/pcre-8.41 --with-http_stub_status_module --with-http_sub_module --with-http_gzip_static_module --without-mail_pop3_module --without-mail_imap_module --without-mail_smtp_module  --add-module=../ngx_devel_kit-0.3.0/ --add-module=../lua-nginx-module-0.10.10/
+[root@webs-ebt nginx-1.12.1]# make -j2 && make install
+[root@webs-ebt nginx-1.12.1]# ln -s /usr/local/nginx-1.12.1 /usr/local/nginx
+[root@webs-ebt nginx-1.12.1]# ln -s /usr/local/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
 </pre>
 如果不创建符号链接，可能出现以下异常：
 error while loading shared libraries: libluajit-5.1.so.2: cannot open shared object file: No such file or directory
@@ -76,8 +77,8 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
                 content_by_lua 'ngx.say("hello,lua")';
         }
     
-[root@openstack-compute-node5 ~]# /usr/local/nginx-1.9.4/sbin/nginx –t
-[root@openstack-compute-node5 ~]# /usr/local/nginx-1.9.4/sbin/nginx
+[root@webs-ebt src]# /usr/local/nginx/sbin/nginx -t
+[root@webs-ebt src]# /usr/local/nginx/sbin/nginx -t
 </pre>
 
 然后访问http://xxx.xxx.xxx.xxx/hello 如果出现hello,lua。表示安装完成,然后就可以。
@@ -90,14 +91,14 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 # yum install -y readline-devel pcre-devel openssl-devel
 # cd /usr/local/src
 下载并编译安装openresty
-# wget https://openresty.org/download/ngx_openresty-1.9.3.2.tar.gz
-# tar zxf ngx_openresty-1.9.3.2.tar.gz
-# cd ngx_openresty-1.9.3.2
-# ./configure --prefix=/usr/local/openresty-1.9.3.2 \
+# wget "https://openresty.org/download/openresty-1.11.2.5.tar.gz"
+# tar zxf openresty-1.11.2.5.tar.gz
+# cd openresty-1.11.2.5
+# ./configure --prefix=/usr/local/openresty-1.11.2.5 \
 --with-luajit --with-http_stub_status_module \
---with-pcre --with-pcre-jit
+--with-pcre=/usr/local/src/pcre-8.41 --with-pcre-jit
 # gmake && gmake install
-# ln -s /usr/local/openresty-1.9.3.2/ /usr/local/openresty
+# ln -s /usr/local/openresty-1.11.2.5 /usr/local/openresty
 
 测试openresty安装
 # vim /usr/local/openresty/nginx/conf/nginx.conf
@@ -109,9 +110,9 @@ server {
             }
         }
 }
-# /usr/local/openresty/nginx/sbin/nginx -t
-nginx: the configuration file /usr/local/openresty-1.9.3.2/nginx/conf/nginx.conf syntax is ok
-nginx: configuration file /usr/local/openresty-1.9.3.2/nginx/conf/nginx.conf test is successful
+[root@webs-ebt src]# /usr/local/openresty-1.11.2.5/nginx/sbin/nginx -t
+nginx: the configuration file /usr/local/openresty-1.11.2.5/nginx/conf/nginx.conf syntax is ok
+nginx: configuration file /usr/local/openresty-1.11.2.5/nginx/conf/nginx.conf test is successful
 # /usr/local/openresty/nginx/sbin/nginx
 Hello World
 # curl http://192.168.199.33/hello
