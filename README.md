@@ -1,8 +1,6 @@
 # waf
-使用Nginx+Lua实现自定义WAF（Web application firewall）
-
-##版权声明
-    严重参考（照抄）https://github.com/loveshell/ngx_lua_waf
+- 使用Nginx+Lua实现自定义WAF（Web application firewall）
+- 看了两天Lua，练练手，参考https://github.com/loveshell/ngx_lua_waf
 
 ###需求产生
     由于原生态的Nginx的一些安全防护功能有限，就研究能不能自己编写一个WAF，参考（照抄）Kindle大神的ngx_lua_waf，自己尝试写一个了，使用两天时间，边学Lua，边写。不过不是安全专业，只实现了一些比较简单的功能：
