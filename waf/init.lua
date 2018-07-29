@@ -44,7 +44,7 @@ end
 --allow white url
 function white_url_check()
     if config_white_url_check == "on" then
-        local URL_WHITE_RULES = get_rule('writeurl.rule')
+        local URL_WHITE_RULES = get_rule('whiteurl.rule')
         local REQ_URI = ngx.var.request_uri
         if URL_WHITE_RULES ~= nil then
             for _,rule in pairs(URL_WHITE_RULES) do
