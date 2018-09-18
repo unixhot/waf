@@ -64,6 +64,7 @@ function cc_attack_check()
         local limit = ngx.shared.limit
         CCcount=tonumber(string.match(config_cc_rate,'(.*)/'))
         CCseconds=tonumber(string.match(config_cc_rate,'/(.*)'))
+        limitseconds=tonumber(string.match(config_cc_limit,'.*'))
         local req,_ = limit:get(CC_TOKEN)
         if req then
             if req > CCcount then
@@ -75,7 +76,7 @@ function cc_attack_check()
                 limit:incr(CC_TOKEN,1)
             end
         else
-            limit:set(CC_TOKEN,1,CCseconds)
+            limit:set(CC_TOKEN,1,limitseconds)
         end
     end
     return false
