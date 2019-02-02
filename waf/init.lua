@@ -59,24 +59,69 @@ end
 --deny cc attack
 function cc_attack_check()
     if config_cc_check == "on" then
-        local ATTACK_URI=ngx.var.uri
-        local CC_TOKEN = get_client_ip()..ATTACK_URI
-        local limit = ngx.shared.limit
-        CCcount=tonumber(string.match(config_cc_rate,'(.*)/'))
-        CCseconds=tonumber(string.match(config_cc_rate,'/(.*)'))
-        local req,_ = limit:get(CC_TOKEN)
-        if req then
-            if req > CCcount then
-                log_record('CC_Attack',ngx.var.request_uri,"-","-")
-                if config_waf_enable == "on" then
-                    ngx.exit(403)
-                end
-            else
-                limit:incr(CC_TOKEN,1)
-            end
-        else
-            limit:set(CC_TOKEN,1,CCseconds)
+        local get_headers = ngx.req.get_headers
+        local ua = ngx.var.http_user_agent
+        local uri = ngx.var.request_uri
+        local url = ngx.var.host .. uri
+        local redis = require 'redis'
+        local red = redis.new()
+        local RedisIP = '127.0.0.1'
+        local RedisPORT = 6379
+        local blackseconds = 7200
+        if ua == nil then
+            ua = "unknown"
         end
+        if (string.find(uri,'/.*')) then
+            CCcount=tonumber(string.match(config_cc_rate,'(.*)/'))
+            CCseconds=tonumber(string.match(config_cc_rate,'/(.*)'))
+        end
+        red:set_timeout(100)
+        local ok, err = red.connect(red, RedisIP, RedisPORT)
+        if ok then
+            red.connect(red, RedisIP, RedisPORT)
+            function getClientIp()
+                IP = ngx.req.get_headers()["x_forwarded_for"]
+                if IP == nil then
+                    IP = ngx.req.get_headers()["X-Real-IP"]
+                end
+                if IP == nil then
+                    IP  = ngx.var.remote_addr
+                end
+                if IP == nil then
+                    IP  = "unknown"
+                end
+                return IP
+            end
+            function getToken()
+                clientToken = ngx.var.cookie_Token
+                return clientToken
+            end
+            local token = getClientIp() .. "." .. ngx.md5(uri .. url .. ua)
+            if red:exists(token) == 0 then
+                ngx.header['Set-Cookie'] = 'Token=' .. token
+                red:incr(token)
+                red:expire(token,CCseconds)
+            else
+                local clientToken = getToken()
+                if red:exists(clientToken) == 0 then
+                    ngx.exit(503)
+                end
+                local times = tonumber(red:get(token))
+                if times >= CCcount then
+                    local blackReq = red:exists("black." .. token)
+                    if (blackReq == 0) then
+                         red:set("black." .. token,1)
+                         red:expire("black." .. token,blackseconds)
+                         red:expire(token,blackseconds)
+                         ngx.exit(503)
+                    else
+                         ngx.exit(503)
+                    end
+                else
+                    red:incr(token)
+                end
+            end
+        end        
     end
     return false
 end
@@ -167,7 +212,8 @@ end
 function post_attack_check()
     if config_post_check == "on" then
         local POST_RULES = get_rule('post.rule')
-        for _,rule in pairs(ARGS_RULES) do
+        for _,rule in pairs(POST_RULES) do
+            ngx.req.read_body()
             local POST_ARGS = ngx.req.get_post_args()
         end
         return true

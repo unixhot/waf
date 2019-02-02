@@ -133,3 +133,18 @@ HelloWorld
 [root@openstack-compute-node5 ~]# /usr/local/openresty/nginx/sbin/nginx –t
 [root@openstack-compute-node5 ~]# /usr/local/openresty/nginx/sbin/nginx
 </pre>
+
+###2019-02-02提交
+
+<pre>
+###1.修复post验证错误日志报出bad argument #1 to 'pairs' (table expected, got nil)和no request body found; maybe you should turn on lua_need_request_body?的bug
+###2.新增CC攻击防御使用Redis做Token校验;
+###3.新增访问时返回一个Cookie作为Token的值,默认为每一个uri,用Token的值做访问次数的校验,修改redis配置在init.lua文件中
+
+修改Redis配置:
+        local RedisIP = '127.0.0.1'
+        local RedisPORT = 6379
+        local blackseconds = 7200
+修改uri:
+        (string.find(uri,'/.*'))
+</pre>
