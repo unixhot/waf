@@ -32,7 +32,61 @@ WAF一句话描述，就是解析HTTP请求（协议解析模块），规则检�
 - 选择1: 可以选择使用原生的Nginx，增加Lua模块实现部署。
 - 选择2: 直接使用OpenResty
 
-### Nginx + Lua部署
+### OpenResty安装
+
+1 Yum安装OpenResty（推荐）
+
+源码安装和Yum安装选择其一即可，默认均安装在/usr/local/openresty目录下。
+
+```
+[root@opsany ~]# wget https://openresty.org/package/centos/openresty.repo
+[root@opsany ~]# sudo mv openresty.repo /etc/yum.repos.d/
+[root@opsany ~]# sudo yum install -y openresty
+```
+
+2. 测试OpenResty和运行Lua
+
+```
+[root@opsany ~]# vim /usr/local/openresty/nginx/conf/nginx.conf
+#在默认的server配置中增加
+        location /hello {
+            default_type text/html;
+            content_by_lua_block {
+                ngx.say("<p>hello, world</p>")
+            }
+        }
+[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -t
+nginx: the configuration file /usr/local/openresty-1.17.8.2/nginx/conf/nginx.conf syntax is ok
+nginx: configuration file /usr/local/openresty-1.17.8.2/nginx/conf/nginx.conf test is successful
+[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx
+```
+
+3. 测试访问
+
+```
+[root@opsany ~]# curl http://127.0.0.1/hello
+<p>hello, world</p>
+```
+
+### WAF部署
+
+```
+[root@opsany ~]# git clone https://github.com/unixhot/waf.git
+[root@opsany ~]# cp -r ./waf/waf /usr/local/openresty/nginx/conf/
+[root@opsany ~]# vim /usr/local/openresty/nginx/conf/nginx.conf
+#在http{}中增加，注意路径，同时WAF日志默认存放在/tmp/日期_waf.log
+#WAF
+    lua_shared_dict limit 50m;
+    lua_package_path "/usr/local/openresty/nginx/conf/waf/?.lua";
+    init_by_lua_file "/usr/local/openresty/nginx/conf/waf/init.lua";
+    access_by_lua_file "/usr/local/openresty/nginx/conf/waf/access.lua";
+[root@opsany ~]# ln -s /usr/local/openresty/lualib/resty/ /usr/local/openresty/nginx/conf/waf/resty
+[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -t
+[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -s reload
+```
+
+
+### Nginx + Lua源码编译部署
 
 1. Nginx安装必备的Nginx和PCRE软件包。
 
@@ -101,7 +155,7 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 然后访问http://xxx.xxx.xxx.xxx/hello 如果出现hello,lua。表示安装完成,然后就可以。
 
 
-### OpenResty部署
+### OpenResty源码编译部署
 
 1. 安装依赖软件包
 
@@ -109,7 +163,10 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 [root@opsany ~]# yum install -y readline-devel pcre-devel openssl-devel
 ```
 
-2. 下载并编译安装OpenResty
+2. 安装OpenResty
+
+
+2.1 下载并编译安装OpenResty
 
 ```
 [root@opsany ~]# cd /usr/local/src
@@ -123,44 +180,4 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 [root@opsany openresty-1.17.8.2]# gmake && gmake install
 [root@opsany openresty-1.17.8.2]# cd
 [root@opsany ~]# ln -s /usr/local/openresty-1.17.8.2/ /usr/local/openresty
-```
-
-3. 测试OpenResty和运行Lua
-
-```
-[root@opsany ~]# vim /usr/local/openresty/nginx/conf/nginx.conf
-#在默认的server配置中增加
-        location /hello {
-            default_type text/html;
-            content_by_lua_block {
-                ngx.say("<p>hello, world</p>")
-            }
-        }
-[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -t
-nginx: the configuration file /usr/local/openresty-1.17.8.2/nginx/conf/nginx.conf syntax is ok
-nginx: configuration file /usr/local/openresty-1.17.8.2/nginx/conf/nginx.conf test is successful
-[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx
-```
-
-测试访问
-```
-[root@opsany ~]# curl http://127.0.0.1/hello
-<p>hello, world</p>
-```
-
-### WAF部署
-
-```
-[root@opsany ~]# git clone https://github.com/unixhot/waf.git
-[root@opsany ~]# cp -r ./waf/waf /usr/local/openresty/nginx/conf/
-[root@opsany ~]# vim /usr/local/openresty/nginx/conf/nginx.conf
-#在http{}中增加，注意路径，同时WAF日志默认存放在/tmp/日期_waf.log
-#WAF
-    lua_shared_dict limit 50m;
-    lua_package_path "/usr/local/openresty/nginx/conf/waf/?.lua";
-    init_by_lua_file "/usr/local/openresty/nginx/conf/waf/init.lua";
-    access_by_lua_file "/usr/local/openresty/nginx/conf/waf/access.lua";
-[root@opsany ~]# ln -s /usr/local/openresty/lualib/resty/ /usr/local/openresty/nginx/conf/waf/resty
-[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -t
-[root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -s reload
 ```
