@@ -85,8 +85,9 @@ nginx: configuration file /usr/local/openresty-1.17.8.2/nginx/conf/nginx.conf te
 [root@opsany ~]# /usr/local/openresty/nginx/sbin/nginx -s reload
 ```
 
+# 附录
 
-### Nginx + Lua源码编译部署
+## Nginx + Lua源码编译部署(不推荐)
 
 1. Nginx安装必备的Nginx和PCRE软件包。
 
@@ -155,7 +156,7 @@ error while loading shared libraries: libluajit-5.1.so.2: cannot open shared obj
 然后访问http://xxx.xxx.xxx.xxx/hello 如果出现hello,lua。表示安装完成,然后就可以。
 
 
-### OpenResty源码编译部署
+### OpenResty源码编译部署（不推荐）
 
 1. 安装依赖软件包
 
