@@ -48,7 +48,7 @@ function log_record(method,url,data,ruletag)
     local LOG_PATH = config_log_dir
     local CLIENT_IP = get_client_ip()
     local USER_AGENT = get_user_agent()
-    local SERVER_NAME = ngx.var.server_name
+    local SERVER_NAME = ngx.var.host
     local LOCAL_TIME = ngx.localtime()
     local log_json_obj = {
                  client_ip = CLIENT_IP,

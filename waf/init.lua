@@ -122,9 +122,13 @@ end
 --deny url args
 function url_args_attack_check()
     if config_url_args_check == "on" then
+        local REQ_ARGS,ERR = ngx.req.get_uri_args()
+            -- limit max args to stop uri parameter overflow , return 403 if args larger than default(100)
+            if err == "truncated" then
+                ngx.exit(403)
+            end
         local ARGS_RULES = get_rule('args.rule')
         for _,rule in pairs(ARGS_RULES) do
-            local REQ_ARGS = ngx.req.get_uri_args()
             for key, val in pairs(REQ_ARGS) do
                 if type(val) == 'table' then
                     ARGS_DATA = table.concat(val, " ")
@@ -166,9 +170,30 @@ end
 --deny post
 function post_attack_check()
     if config_post_check == "on" then
+        ngx.req.read_body()
+        local POST_ARGS,err = ngx.req.get_post_args()
+            -- limit max post args to stop uri parameter overflow , return 403 if post args larger than default(100)
+            if err == "truncated" then
+                ngx.exit(403)
+            end
         local POST_RULES = get_rule('post.rule')
-        for _,rule in pairs(ARGS_RULES) do
-            local POST_ARGS = ngx.req.get_post_args()
+
+    	for key, val in pairs(POST_ARGS) do
+            if type(val) == "table" then
+	            ARGS_DATA = table.concat(key, ", ")
+            else
+                ARGS_DATA = key
+            end 
+	    end
+
+        for _,rule in pairs(POST_RULES) do
+            if ARGS_DATA and type(ARGS_DATA) ~= "boolean" and rule ~="" and rulematch(unescape(ARGS_DATA),rule,"jo") then
+                log_record('Deny_POST_Args',ngx.var.request_uri,"-",rule)
+                if config_waf_enable == "on" then
+                    waf_output()
+                    return true
+                end
+            end
         end
         return true
     end
