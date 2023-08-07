@@ -28,6 +28,14 @@ config_cc_rate = "10/60"
 config_post_check = "on"
 --config waf output redirect/html
 config_waf_output = "html"
+--blackip
+config_black_ip = {
+    '10.15.209.0/24',
+}
+--redis
+config_redis_host = "127.0.0.1"
+config_redis_port = 6379
+config_redis_passwd = "123456"
 --if config_waf_output ,setting url
 config_waf_redirect_url = "https://www.unixhot.com"
 config_output_html=[[
