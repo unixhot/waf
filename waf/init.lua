@@ -8,37 +8,36 @@ local unescape = ngx.unescape_uri
 
 --allow white ip
 function white_ip_check()
-     if config_white_ip_check == "on" then
-        local IP_WHITE_RULE = get_rule('whiteip.rule')
-        local WHITE_IP = get_client_ip()
-        if IP_WHITE_RULE ~= nil then
-            for _,rule in pairs(IP_WHITE_RULE) do
-                if rule ~= "" and rulematch(WHITE_IP,rule,"jo") then
-                    log_record('White_IP',ngx.var_request_uri,"_","_")
-                    return true
-                end
-            end
+    if config_white_ip_check == "on" then
+        local IP_WHITE_RULE = config_white_ip
+        local ipmatcher = require "vendor.ipmatcher"
+        local ip = ipmatcher.new(IP_WHITE_RULE)
+        local CLIENT_IP = get_client_ip()
+
+        -- clinetip in white_ip
+        if ip:match(CLIENT_IP) then
+            return true
         end
     end
+
+    return false
 end
 
 --deny black ip
 function black_ip_check()
-     if config_black_ip_check == "on" then
-        local IP_BLACK_RULE = get_rule('blackip.rule')
-        local BLACK_IP = get_client_ip()
-        if IP_BLACK_RULE ~= nil then
-            for _,rule in pairs(IP_BLACK_RULE) do
-                if rule ~= "" and rulematch(BLACK_IP,rule,"jo") then
-                    log_record('BlackList_IP',ngx.var_request_uri,"_","_")
-                    if config_waf_enable == "on" then
-                        ngx.exit(403)
-                        return true
-                    end
-                end
-            end
+    if config_black_ip_check == "on" then
+        local IP_BLACK_RULE = config_black_ip
+        local ipmatcher = require "vendor.ipmatcher"
+        local ip = ipmatcher.new(IP_BLACK_RULE)
+        local CLIENT_IP = get_client_ip()
+
+         -- clinetip in black_ip
+         if ip:match(CLIENT_IP) then
+            ngx.exit(403)
+            return true
         end
     end
+    
 end
 
 --allow white url
@@ -59,24 +58,43 @@ end
 --deny cc attack
 function cc_attack_check()
     if config_cc_check == "on" then
-        local ATTACK_URI=ngx.var.uri
-        local CC_TOKEN = get_client_ip()..ATTACK_URI
-        local limit = ngx.shared.limit
         CCcount=tonumber(string.match(config_cc_rate,'(.*)/'))
         CCseconds=tonumber(string.match(config_cc_rate,'/(.*)'))
-        local req,_ = limit:get(CC_TOKEN)
-        if req then
-            if req > CCcount then
-                log_record('CC_Attack',ngx.var.request_uri,"-","-")
-                if config_waf_enable == "on" then
-                    ngx.exit(403)
-                end
-            else
-                limit:incr(CC_TOKEN,1)
-            end
-        else
-            limit:set(CC_TOKEN,1,CCseconds)
+        local ATTACK_URI=ngx.var.uri
+        local CC_USER = get_client_ip()..ATTACK_URI
+        -- set redis key with expire time
+        -- lua redis conn pool
+
+        -- redis connect
+        local redis = require "vendor.redis"
+        local red = redis:new()
+        red:set_timeouts(1000, 1000, 1000)
+
+        local ok, err = red:connect(config_redis_host, config_redis_port)
+        if not ok then
+            ngx.say("failed to connect redis: ", err)
+            return
         end
+        local res, err = red:auth(config_redis_passwd)
+        if not res then
+            ngx.say("failed to authenticate: ", err)
+            return
+        end
+
+        red:incr(CC_USER)
+        red:expire(CC_USER,CCseconds)
+
+        if tonumber(red:get(CC_USER)) >= CCcount then
+            ngx.say("访问过于频繁 请稍后重试")
+            return
+        end 
+
+        local ok, err = red:set_keepalive(10000, 100)
+        if not ok then
+            ngx.say("failed to set keepalive: ", err)
+            return
+        end
+        
     end
     return false
 end
